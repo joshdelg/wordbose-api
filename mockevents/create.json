@@ -1,0 +1,8 @@
+{
+  "requestContext": {
+    "identity": {
+      "cognitoIdentityId": "USER-SUB-1234"
+    }
+  },
+  "body": "{\"transcriptName\":\"Created!\",\"transcript\":\"i've been created from the test user!\"}"
+}

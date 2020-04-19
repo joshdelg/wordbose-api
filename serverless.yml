@@ -39,14 +39,23 @@ provider:
       Resource: "arn:aws:dynamodb:us-west-2:*:*"
 
 functions:
+  # Create route for testing
+  create:
+    handler: create.handler
+    events:
+      - http:
+          path: transcript
+          method: post
+          cors: true
+          authorizer: aws_iam
   get:
     handler: get.handler
     events:
-        - http:
-            path: transcript/{id}
-            method: get
-            cors: true
-            authorizer: aws_iam
+      - http:
+          path: transcript/{id}
+          method: get
+          cors: true
+          authorizer: aws_iam
   list:
     handler: list.handler
     events:
@@ -67,10 +76,10 @@ functions:
     handler: delete.handler
     events:
       - http:
-        path: transcript/{id}
-        method: delete
-        cors: true
-        authorizer: aws_iam
+          path: transcript/{id}
+          method: delete
+          cors: true
+          authorizer: aws_iam
 
 # Create resources with CloudFormation templates
 resources:
