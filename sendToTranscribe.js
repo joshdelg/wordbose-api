@@ -23,10 +23,8 @@ export async function handler(event, context) {
 
   try {
     await transcribe.startTranscriptionJob(params).promise();
-    console.log('Transcribe job started with job name', params.TranscriptionJobName);
     return createResponse(200, JSON.stringify({status: true}));
   } catch (e) {
-    console.log(e);
     return createResponse(500, JSON.stringify({status: false}));
   }
 
