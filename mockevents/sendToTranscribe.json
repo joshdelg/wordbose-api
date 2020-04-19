@@ -1,0 +1,14 @@
+{
+  "Records": [
+    {
+      "s3": {
+        "bucket": {
+          "name": "wordbose-file-upload-test"
+        },
+        "object": {
+          "key": "private/test-audio.wav"
+        }
+      }
+    }
+  ]
+}

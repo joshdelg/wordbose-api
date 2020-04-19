@@ -27,6 +27,7 @@ provider:
   
   # iamRoleStatements = iamRole for lambda functions
   iamRoleStatements:
+    # Permissions for CRUD lambda functions
     - Effect: Allow
       Action:
         - dynamodb:DescribeTable
@@ -37,6 +38,17 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource: "arn:aws:dynamodb:us-west-2:*:*"
+    # Permissions for sendToTranscribe
+    # Permission to use transcribe
+    - Effect: Allow
+      Action:
+        - transcribe:*
+      Resource: "*"
+    # Permission to access transcript destination bucket
+    - Effect: Allow
+      Action:
+        - s3:GetObject
+      Resource: "arn:aws:s3:::wordbose-destination-test"
 
 functions:
   # Create route for testing
@@ -80,6 +92,9 @@ functions:
           method: delete
           cors: true
           authorizer: aws_iam
+  # S3 event trigger must be configured manually
+  sendToTranscribe:
+    handler: sendToTranscribe.handler
 
 # Create resources with CloudFormation templates
 resources:
