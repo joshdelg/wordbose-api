@@ -6,7 +6,7 @@
           "name": "wordbose-file-upload-test"
         },
         "object": {
-          "key": "private/test-audio.wav"
+          "key": "private/USER-SUB-1234/test-audio.wav"
         }
       }
     }

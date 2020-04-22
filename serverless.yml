@@ -24,6 +24,8 @@ provider:
   #  SAMPLE_ENV_VAR: ${env:SAMPLE_ENV_VAR}
   environment:
     tableName: transcripts-test
+    uploadsBucketName: wordbose-file-upload-test
+    destBucketName: wordbose-destination-test
   
   # iamRoleStatements = iamRole for lambda functions
   iamRoleStatements:
@@ -44,11 +46,16 @@ provider:
       Action:
         - transcribe:*
       Resource: "*"
-    # Permission to access transcript destination bucket
+    # Permission to access transcript destination bucket and write to data file
     - Effect: Allow
       Action:
         - s3:GetObject
-      Resource: "arn:aws:s3:::wordbose-destination-test"
+        - s3:PutObject
+      Resource: "arn:aws:s3:::wordbose-destination-test/*"
+    - Effect: Allow
+      Action:
+        - s3:GetObject
+      Resource: "arn:aws:s3:::wordbose-file-upload-test/*"
 
 functions:
   # Create route for testing
@@ -92,7 +99,8 @@ functions:
           method: delete
           cors: true
           authorizer: aws_iam
-  # S3 event trigger must be configured manually
+  # S3 event trigger must be configured manually from upload bucket
+  # (only on uploads to /private/)
   sendToTranscribe:
     handler: sendToTranscribe.handler
 
