@@ -104,6 +104,13 @@ functions:
   sendToTranscribe:
     handler: sendToTranscribe.handler
 
+  # S3 event trigger must be configured manually from destination bucket
+  onTranscribeDump:
+    handler: onTranscribeDump.handler
+
+  ## With manually configured events, events must be reconfigured if ARN of
+  ## Lambda Function changes when redeploying the stack (function is renamed etc.)
+
 # Create resources with CloudFormation templates
 resources:
   # API Gateway Errors

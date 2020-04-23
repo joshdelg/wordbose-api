@@ -38,7 +38,7 @@ export async function handler(event, context) {
   const s3UploadParams = {
     Body: Buffer.from(JSON.stringify(transcriptData)),
     Bucket: process.env.destBucketName,
-    Key: `data/${transcriptId}.json`
+    Key: `data/${transcriptId}.data`
   };
 
   try {
