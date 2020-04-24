@@ -14,43 +14,40 @@ export async function handler(event, context) {
   const fileName = itemKey.substring(itemKey.lastIndexOf('/') + 1);
   const transcriptId = uuidv4();
 
+  // Initialize AWS services
   const transcribe = new AWS.TranscribeService();
-  const s3 = new AWS.S3();
+  const documentClient = new AWS.DynamoDB.DocumentClient();
 
   const transcribeJobParams = {
     LanguageCode: 'en-US',
     Media: {
       MediaFileUri: `s3://${bucketName}/${itemKey}`
     },
-    TranscriptionJobName: transcriptId,
+    TranscriptionJobName: `${userId}_${transcriptId}`,
     OutputBucketName: process.env.destBucketName
   };
 
-  const transcriptData = {
-    userId: userId,
-    transcriptId: transcriptId,
-    transcriptName: fileName.substring(0, fileName.lastIndexOf('.')),
-    fileName: fileName,
-    fileLocation: transcribeJobParams.Media.MediaFileUri,
-    date: moment()
-  };
-
-  const s3UploadParams = {
-    Body: Buffer.from(JSON.stringify(transcriptData)),
-    Bucket: process.env.destBucketName,
-    Key: `data/${transcriptId}.data`
+  const dynamoParams = {
+    TableName: process.env.tableName,
+    Item: {
+      userId: userId,
+      transcriptId: transcriptId,
+      transcriptName: fileName.substring(0, fileName.lastIndexOf('.')),
+      fileName: fileName,
+      fileLocation: transcribeJobParams.Media.MediaFileUri,
+      date: moment().format()
+    }
   };
 
   try {
     // Send file to Transcribe
     await transcribe.startTranscriptionJob(transcribeJobParams).promise();
 
-    // Upload data file to S3
-    await s3.putObject(s3UploadParams).promise();
+    // Upload existing data to DynamoDB
+    await documentClient.put(dynamoParams).promise();
 
-    return createResponse(200, JSON.stringify({status: true}));
+    return createResponse(200, JSON.stringify(dynamoParams.Item));
   } catch (e) {
     return createResponse(500, JSON.stringify({status: false}));
   }
-
 }

@@ -23,6 +23,7 @@ provider:
   #environment:
   #  SAMPLE_ENV_VAR: ${env:SAMPLE_ENV_VAR}
   environment:
+    # Convert to reference to resources defined in Resources block
     tableName: transcripts-test
     uploadsBucketName: wordbose-file-upload-test
     destBucketName: wordbose-destination-test
@@ -105,6 +106,7 @@ functions:
     handler: sendToTranscribe.handler
 
   # S3 event trigger must be configured manually from destination bucket
+  # Can be set to only .json files but since transcribe is only output this is redundant
   onTranscribeDump:
     handler: onTranscribeDump.handler
 
@@ -115,4 +117,3 @@ functions:
 resources:
   # API Gateway Errors
   - ${file(resources/api-gateway-errors.yml)}
-
