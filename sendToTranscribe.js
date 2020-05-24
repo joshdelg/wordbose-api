@@ -7,12 +7,19 @@ export async function handler(event, context) {
 
   // Triggered by S3 event
   const bucketName = event.Records[0].s3.bucket.name;
-  const itemKey = event.Records[0].s3.object.key; // In the form 'private/user-id/file-name'
+
+  // itemKey is encoded so ':' becomes %3A, this needs to be converted back to :
+  const itemKey = event.Records[0].s3.object.key.replace('%3A', ':'); // In the form 'private/user-id/file-name'
 
   // Parsing file name
+  // userId = us-west-2:27tuaqoncwlgnuam;/jva8nw
   const userId = itemKey.substring(8, itemKey.lastIndexOf('/'));
+  // userIdMod = 27tuaqoncwlgnuam;/jva8nw because transcriptJobName can't have ':'
+  const userIdMod = userId.substring(10);
   const fileName = itemKey.substring(itemKey.lastIndexOf('/') + 1);
   const transcriptId = uuidv4();
+
+  const s3URI = `s3://${bucketName}/${itemKey}`;
 
   // Initialize AWS services
   const transcribe = new AWS.TranscribeService();
@@ -21,9 +28,9 @@ export async function handler(event, context) {
   const transcribeJobParams = {
     LanguageCode: 'en-US',
     Media: {
-      MediaFileUri: `s3://${bucketName}/${itemKey}`
+      MediaFileUri: s3URI
     },
-    TranscriptionJobName: `${userId}_${transcriptId}`,
+    TranscriptionJobName: `${userIdMod}_${transcriptId}`,
     OutputBucketName: process.env.destBucketName
   };
 
@@ -40,6 +47,7 @@ export async function handler(event, context) {
   };
 
   try {
+    console.log(s3URI);
     // Send file to Transcribe
     await transcribe.startTranscriptionJob(transcribeJobParams).promise();
 
@@ -48,6 +56,7 @@ export async function handler(event, context) {
 
     return createResponse(200, JSON.stringify(dynamoParams.Item));
   } catch (e) {
+    console.log(e);
     return createResponse(500, JSON.stringify({status: false}));
   }
 }

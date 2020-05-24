@@ -16,12 +16,13 @@ export async function handler(event, context) {
     const itemKey = event.Records[0].s3.object.key;
 
     // Parse itemKey; will be in format {userId}_{transcriptId}.json
-    const userId = itemKey.substring(0, itemKey.indexOf('_'));
+    const userIdMod = itemKey.substring(0, itemKey.indexOf('_'));
+    const userId = 'us-west-2:' + userIdMod;
     const transcriptId = itemKey.substring(itemKey.indexOf('_') + 1, itemKey.length - '.json'.length);
 
     const s3TranscriptParams = {
        Bucket: bucketName,
-       Key: `${userId}_${transcriptId}.json`
+       Key: `${userIdMod}_${transcriptId}.json`
     };
 
     try {
@@ -49,6 +50,7 @@ export async function handler(event, context) {
 
       return createResponse(200, JSON.stringify(updated.Attributes));
     } catch (e) {
+      console.log(e);
       return createResponse(500, JSON.stringify({status: false}));
     }
   }
