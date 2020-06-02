@@ -1,9 +1,7 @@
 import AWS from 'aws-sdk';
-import { v4 as uuidv4 } from 'uuid';
 import createResponse from './libs/response-lib';
 
 export async function handler(event, context) {
-  // Create route just for testing purposes
   const documentClient = new AWS.DynamoDB.DocumentClient();
 
   const data = JSON.parse(event.body);
@@ -12,9 +10,10 @@ export async function handler(event, context) {
     TableName: process.env.tableName,
     Item: {
       userId: event.requestContext.identity.cognitoIdentityId,
-      transcriptId: uuidv4(),
+      transcriptId: data.transcriptId,
       transcriptName: data.transcriptName,
-      transcript: data.transcript
+      fileName: data.fileName,
+      date: data.date
     }
   };
 
