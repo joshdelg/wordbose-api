@@ -5,6 +5,8 @@ export async function handler(event, context) {
   const documentClient = new AWS.DynamoDB.DocumentClient();
 
   const data = JSON.parse(event.body);
+  const extension = data.fileName.substring(data.fileName.lastIndexOf('.'));
+  const fileLocation = `s3://${process.env.uploadsBucketName}/private/${event.requestContext.identity.cognitoIdentityId}/${data.transcriptId}.${extension}`;
 
   const params = {
     TableName: process.env.tableName,
@@ -13,7 +15,8 @@ export async function handler(event, context) {
       transcriptId: data.transcriptId,
       transcriptName: data.transcriptName,
       fileName: data.fileName,
-      date: data.date
+      date: data.date,
+      fileLocation: fileLocation
     }
   };
 

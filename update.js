@@ -30,6 +30,7 @@ export async function handler(event, context) {
     const updated = await documentClient.update(params).promise();
     return createResponse(200, JSON.stringify(updated.Attributes));
   } catch (e) {
+    console.log(e);
     return createResponse(500, JSON.stringify({status: false}));
   }
 
