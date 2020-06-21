@@ -16,7 +16,8 @@ export async function handler(event, context) {
       transcriptName: data.transcriptName,
       fileName: data.fileName,
       date: data.date,
-      fileLocation: fileLocation
+      fileLocation: fileLocation,
+      email: data.email
     }
   };
 
