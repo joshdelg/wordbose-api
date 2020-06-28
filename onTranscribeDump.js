@@ -9,6 +9,7 @@ export async function handler(event, context) {
 
     // Initialize AWS services
     const s3 = new AWS.S3();
+    const ses = new AWS.SES();
     const documentClient = new AWS.DynamoDB.DocumentClient();
 
     // Get transcript file location from S3 trigger event
@@ -32,6 +33,43 @@ export async function handler(event, context) {
       const transcriptText = JSON.parse(transcriptFile.Body.toString()).results.transcripts[0].transcript;
       // .results.items can be used to get data/alternatives for each word with timestamps for editing in the future
 
+      // Get email and other data from dynamoDB
+      const dynamoGetParams = {
+        TableName: process.env.tableName,
+        Key: {
+          userId: userId,
+          transcriptId: transcriptId
+        }
+      };
+
+      const object = await documentClient.get(dynamoGetParams).promise();
+      const transcriptItem = object.Item;
+      console.log("transcript item", transcriptItem);
+
+      // Send test email to alert of transcript finish
+      const emailParams = {
+        Destination: {
+          ToAddresses: [transcriptItem.email]
+        },
+        Message: {
+          Body: {
+            Text: {
+              Charset: "UTF-8",
+              Data: transcriptText
+            }
+          },
+          Subject: {
+            Charset: "UTF-8",
+            Data: "Your transcript is complete!"
+          }
+        },
+        Source: "oscar@wordbose.com"
+      };
+
+      const sentEmail = await ses.sendEmail(emailParams).promise();
+      console.log("sent email", sentEmail);
+
+      // Update existing DynamoDB object with the transcript text
       const dynamoParams = {
         TableName: process.env.tableName,
         Key: {
@@ -45,7 +83,7 @@ export async function handler(event, context) {
         ReturnValues: 'ALL_NEW'
       };
 
-      // Update existing DynamoDB object with the transcript text
+
       const updated = await documentClient.update(dynamoParams).promise();
 
       return createResponse(200, JSON.stringify(updated.Attributes));

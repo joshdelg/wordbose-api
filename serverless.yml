@@ -58,6 +58,12 @@ provider:
         - s3:GetObject
         - s3:DeleteObject
       Resource: "arn:aws:s3:::wordbose-file-upload-test/*"
+    # Permission to allow for email alert upon transcript completion
+    - Effect: Allow
+      Action:
+        - ses:SendEmail
+        - ses:SendRawEmail
+      Resource: "*"
 
 functions:
   # Create route for testing
