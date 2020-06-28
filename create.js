@@ -6,7 +6,7 @@ export async function handler(event, context) {
 
   const data = JSON.parse(event.body);
   const extension = data.fileName.substring(data.fileName.lastIndexOf('.'));
-  const fileLocation = `s3://${process.env.uploadsBucketName}/private/${event.requestContext.identity.cognitoIdentityId}/${data.transcriptId}.${extension}`;
+  const fileLocation = `s3://${process.env.uploadsBucketName}/private/${event.requestContext.identity.cognitoIdentityId}/${data.transcriptId}${extension}`;
 
   const params = {
     TableName: process.env.tableName,
