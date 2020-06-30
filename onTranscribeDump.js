@@ -9,7 +9,9 @@ export async function handler(event, context) {
 
     // Initialize AWS services
     const s3 = new AWS.S3();
-    const ses = new AWS.SES();
+
+    // ! Uncomment when out of SES sandbox mode
+    // const ses = new AWS.SES();
     const documentClient = new AWS.DynamoDB.DocumentClient();
 
     // Get transcript file location from S3 trigger event
@@ -47,7 +49,11 @@ export async function handler(event, context) {
       console.log("transcript item", transcriptItem);
 
       // Send test email to alert of transcript finish
-      const emailParams = {
+      // ! Uncomment when SES is out of sandbox mode
+      // ! In sandbox mode, emails can only be sent to verified emails
+      // ! Thus, is email is not verified it will throw an error and the
+      // ! Rest of the code in the try block (updating dynamoDB) will not execute
+      /* const emailParams = {
         Destination: {
           ToAddresses: [transcriptItem.email]
         },
@@ -68,6 +74,7 @@ export async function handler(event, context) {
 
       const sentEmail = await ses.sendEmail(emailParams).promise();
       console.log("sent email", sentEmail);
+      */
 
       // Update existing DynamoDB object with the transcript text
       const dynamoParams = {
