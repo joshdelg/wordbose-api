@@ -20,25 +20,43 @@ export async function handler(event, context) {
   const s3URI = `s3://${bucketName}/${itemKey}`;
 
   // Initialize AWS services
+  const documentClient = new AWS.DynamoDB.DocumentClient();
   const transcribe = new AWS.TranscribeService();
 
-  const transcribeJobParams = {
-    LanguageCode: 'en-US',
-    Media: {
-      MediaFileUri: s3URI
-    },
-    TranscriptionJobName: `${userIdMod}_${transcriptId}`,
-    OutputBucketName: process.env.destBucketName
+  const dynamoParams = {
+    TableName: process.env.tableName,
+    Key: {
+      userId: userId,
+      transcriptId: transcriptId
+    }
   };
 
+  // Make DynamoDB request to get number of speakers
   try {
-    console.log(s3URI);
-    // Send file to Transcribe
-    await transcribe.startTranscriptionJob(transcribeJobParams).promise();
+    const object = await documentClient.get(dynamoParams).promise();
+    const numSpeakers = object.Item.numSpeakers;
 
-    return createResponse(200, JSON.stringify({status: true}));
-  } catch (e) {
-    console.log(e);
+    // Default to multiple speakers until setting added on frontend
+    const transcribeJobParams = {
+      LanguageCode: 'en-US',
+      Media: {
+        MediaFileUri: s3URI
+      },
+      TranscriptionJobName: `${userIdMod}_${transcriptId}`,
+      OutputBucketName: process.env.destBucketName,
+      Settings: (numSpeakers > 1) ? ({
+        MaxSpeakerLabels: numSpeakers,
+        ShowSpeakerLabels: true
+      }) : {}
+  };
+
+  console.log(s3URI);
+  // Send file to Transcribe
+  await transcribe.startTranscriptionJob(transcribeJobParams).promise();
+
+  return createResponse(200, JSON.stringify({status: true}));
+  } catch (err) {
+    console.log(err);
     return createResponse(500, JSON.stringify({status: false}));
   }
 }

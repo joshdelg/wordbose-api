@@ -17,7 +17,8 @@ export async function handler(event, context) {
       fileName: data.fileName,
       date: data.date,
       fileLocation: fileLocation,
-      email: data.email
+      email: data.email,
+      numSpeakers: data.numSpeakers
     }
   };
 
