@@ -41,6 +41,7 @@ const blockify = (newBlocks, transcriptObject, numSpeakers) => {
         newText += blocks[ind].text + " ";
         ind++;
       }
+      newText = newText.substring(0, newText.length - 1);
       newBlocks.push({...currBlock, startTime: currBlock.startTime, endTime: blocks[ind - 1].endTime, text: newText});
     }
   } else {

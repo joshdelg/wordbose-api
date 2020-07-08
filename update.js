@@ -18,10 +18,11 @@ export async function handler(event, context) {
       userId: event.requestContext.identity.cognitoIdentityId,
       transcriptId: event.pathParameters.id
     },
-    UpdateExpression: 'set transcriptName = :n, transcript = :t',
+    UpdateExpression: 'set transcriptName = :n, transcript = :t, blocks = :b',
     ExpressionAttributeValues: {
       ':n': data.transcriptName,
-      ':t': data.transcript
+      ':t': data.transcript,
+      ':b': data.blocks
     },
     ReturnValues: 'ALL_NEW'
   };
