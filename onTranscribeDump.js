@@ -153,6 +153,15 @@ export async function handler(event, context) {
 
       const updated = await documentClient.update(dynamoParams).promise();
 
+      // Delete transcribe output file from S3
+      const s3DeleteParams = {
+        Bucket: bucketName,
+        Key: itemKey
+      };
+
+      await s3.deleteObject(s3DeleteParams).promise();
+      console.log(bucketName, itemKey, "deleted");
+
       return createResponse(200, JSON.stringify(updated.Attributes));
     } catch (e) {
       console.log(e);
