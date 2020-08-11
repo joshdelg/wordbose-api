@@ -1,0 +1,8 @@
+{
+    "requestContext": {
+      "identity": {
+        "cognitoIdentityId": "us-west-2:eabf0aa1-8e5f-4bb0-b7ff-9358d278281e"
+      }
+    },
+    "body": "{\"email\":\"delgadillo.i.joshua@gmail.com\"}"
+  }

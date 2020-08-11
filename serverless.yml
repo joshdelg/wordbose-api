@@ -25,12 +25,13 @@ provider:
   environment:
     # Convert to reference to resources defined in Resources block
     tableName: transcripts-test
+    usersTableName: test-wordbose-users
     uploadsBucketName: wordbose-file-upload-test
     destBucketName: wordbose-destination-test
   
   # iamRoleStatements = iamRole for lambda functions
   iamRoleStatements:
-    # Permissions for CRUD lambda functions
+    # Permissions for CRUD lambda functions on any table
     - Effect: Allow
       Action:
         - dynamodb:DescribeTable
@@ -67,7 +68,6 @@ provider:
       Resource: "*"
 
 functions:
-  # Create route for testing
   create:
     handler: create.handler
     events:
@@ -108,6 +108,15 @@ functions:
           method: delete
           cors: true
           authorizer: aws_iam
+  newUser:
+    handler: newUser.handler
+    events:
+      - http:
+          path: newUser
+          method: post
+          cors: true
+          authorizer: aws_iam
+
   # S3 event trigger must be configured manually from upload bucket
   # (only on uploads to /private/)
   sendToTranscribe:
