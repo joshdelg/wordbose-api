@@ -31,6 +31,18 @@ export async function handler(event, context) {
     }
   };
 
+  const dynamoUpdateParams = {
+    TableName: process.env.usersTableName,
+    Key: {
+      userId: userId
+    },
+    UpdateExpression: 'set numTranscripts = numTranscripts + :i',
+    ExpressionAttributeValues: {
+      ':i': 1
+    },
+    ReturnValues: 'ALL_NEW'
+  };
+
   // Make DynamoDB request to get number of speakers
   try {
     const object = await documentClient.get(dynamoParams).promise();
@@ -51,8 +63,12 @@ export async function handler(event, context) {
   };
 
   console.log(s3URI);
+
   // Send file to Transcribe
   await transcribe.startTranscriptionJob(transcribeJobParams).promise();
+
+  // Update number of transcripts in users database
+  await documentClient.update(dynamoUpdateParams).promise();
 
   return createResponse(200, JSON.stringify({status: true}));
   } catch (err) {
