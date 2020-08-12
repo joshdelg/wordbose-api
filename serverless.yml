@@ -28,6 +28,7 @@ provider:
     usersTableName: test-wordbose-users
     uploadsBucketName: wordbose-file-upload-test
     destBucketName: wordbose-destination-test
+    stripeSecret: sk_test_51HFB3hDCRuX8vF0ZwOxGr26Q6IY3Q99oPzGlkhMmX31btm8MjXgLDekeQfw7QHsNFdS638TL8MZ4MHlJZsHPZKuA00EgHGKGVF
   
   # iamRoleStatements = iamRole for lambda functions
   iamRoleStatements:
@@ -113,6 +114,14 @@ functions:
     events:
       - http:
           path: newUser
+          method: post
+          cors: true
+          authorizer: aws_iam
+  billing:
+    handler: billing.handler
+    events:
+      - http:
+          path: billing
           method: post
           cors: true
           authorizer: aws_iam

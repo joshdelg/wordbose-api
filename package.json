@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "moment": "^2.24.0",
+    "stripe": "^8.84.0",
     "uuid": "^7.0.3"
   }
 }
