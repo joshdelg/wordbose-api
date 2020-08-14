@@ -4,5 +4,5 @@
         "cognitoIdentityId": "USER-SUB-1234"
       }
     },
-    "body": "{\"duration\":\"1080\"}"
+    "body": "{\"duration\":\"1260\"}"
   }

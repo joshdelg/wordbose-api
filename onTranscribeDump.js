@@ -102,6 +102,17 @@ export async function handler(event, context) {
       const transcriptItem = object.Item;
       console.log("transcript item", transcriptItem);
 
+      // Blockify the transcript text
+      let newBlocks = [];
+      blockify(newBlocks, transcriptObject, transcriptItem.numSpeakers);
+
+      let formattedTranscriptText = "";
+      let rawTranscriptText = "";
+      newBlocks.forEach((block) => {
+        formattedTranscriptText += `<h4>${block.speakerName}</h4><p>${block.text}</p><br/>`;
+        rawTranscriptText += `${block.speakerName}: ${block.text}\n`;
+      });
+
       // Send email to alert of transcript finish
       const emailParams = {
         Destination: {
@@ -109,9 +120,24 @@ export async function handler(event, context) {
         },
         Message: {
           Body: {
+            Html: {
+              Charset: "UTF-8",
+              Data: `
+                  <div>
+                    <div style="padding: 16px 0;">
+                      <h1>Wordbose | AI-Powered Audio Transcription</h1>
+                    </div>
+                    <div>
+                      <h2>Here's your transcript!</h2>
+                      <h3><a href="http://app.wordbose.com/${transcriptItem.transcriptId}">Click here</a> to view your transcript in the Wordbose Web App to make changes</h3>
+                      ${formattedTranscriptText}
+                    </div>
+                  </div>
+              `
+            },
             Text: {
               Charset: "UTF-8",
-              Data: transcriptText
+              Data: rawTranscriptText
             }
           },
           Subject: {
@@ -127,10 +153,6 @@ export async function handler(event, context) {
 
 
       // Update existing DynamoDB object with the transcript text
-
-      let newBlocks = [];
-      blockify(newBlocks, transcriptObject, transcriptItem.numSpeakers);
-
       const dynamoParams = {
         TableName: process.env.tableName,
         Key: {

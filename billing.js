@@ -3,11 +3,11 @@ import stripePkg from "stripe";
 
 const calculatePrice = (seconds) => {
     // Currency in smallest amount
-    // Price: (Assuming minutes is above free threshold) 10c per minute
-    // Min charge of 50c so for testing just adding 50 to price
-    const totalMins = Math.round(seconds / 60);
+    // Assume route only called if transcript is over threshold
+    // Price: 10c per min after free threshold (15 mins) with a minimum of 50c
+    const totalMins = Math.floor(seconds / 60);
     const chargedMins = totalMins - 15;
-    const price = (chargedMins * 10) + 50;
+    const price = Math.max(50, chargedMins * 10);
 
     return price;
 };

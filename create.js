@@ -18,7 +18,9 @@ export async function handler(event, context) {
       date: data.date,
       fileLocation: fileLocation,
       email: data.email,
-      numSpeakers: data.numSpeakers
+      numSpeakers: data.numSpeakers,
+      fileDuration: data.fileDuration,
+      isPaid: data.isPaid
     }
   };
 
