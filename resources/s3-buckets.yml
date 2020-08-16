@@ -1,0 +1,34 @@
+Resources:
+  UploadsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      # Set the CORS policy
+      CorsConfiguration:
+        CorsRules:
+          -
+            AllowedOrigins:
+              - '*'
+            AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - GET
+              - PUT
+              - POST
+              - DELETE
+              - HEAD
+            ExposedHeaders:
+              - ETag # Does this need to be a string with ''?
+            MaxAge: 3000
+
+  DestinationBucket:
+    Type: AWS::S3::Bucket
+    # No CORS config necessary
+
+# Print out the name of the buckets that are created
+Outputs:
+  UploadsBucketName:
+    Value:
+      Ref: UploadsBucket
+  DestinationBucketName:
+    Value:
+      Ref: DestinationBucket

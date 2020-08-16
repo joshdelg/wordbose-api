@@ -1,0 +1,35 @@
+Resources:
+  # Table for transcripts
+  TranscriptsTable:
+    Type: AWS::DynamoDB::Table
+    # Keep table from being deleted due to typos in serverless.yml
+    DeletionPolicy: Retain
+    Properties:
+      TableName: ${self:custom.tableName}
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: transcriptId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: transcriptId
+          KeyType: RANGE
+      # Set the capacity to auto-scale
+      BillingMode: PAY_PER_REQUEST
+  # Table for users
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    # Keep table from being deleted due to typos in serverless.yml
+    DeletionPolicy: Retain
+    Properties:
+      TableName: ${self:custom.usersTableName}
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+      # Set the capacity to auto-scale
+      BillingMode: PAY_PER_REQUEST

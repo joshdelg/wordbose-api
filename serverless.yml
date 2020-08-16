@@ -1,5 +1,5 @@
 # service name
-service: wordbose-test-api
+service: wordbose-api
 
 # Create an optimized package for our functions 
 package:
@@ -9,6 +9,15 @@ plugins:
   - serverless-bundle # Package our functions with Webpack
   - serverless-offline
   - serverless-dotenv-plugin # Load .env as environment variables
+
+custom:
+  # Stage based on argument passed in when running serverless commands
+  # Otherwise, default to provider stage
+  stage: ${opt:stage, self:provider.stage}
+
+  # Set table names for local testing
+  tableName: ${self:custom.stage}-transcripts
+  usersTableName: ${self:custom.stage}-users
 
 provider:
   name: aws
@@ -24,15 +33,17 @@ provider:
   #  SAMPLE_ENV_VAR: ${env:SAMPLE_ENV_VAR}
   environment:
     # Convert to reference to resources defined in Resources block
-    tableName: transcripts-test
-    usersTableName: test-wordbose-users
-    uploadsBucketName: wordbose-file-upload-test
-    destBucketName: wordbose-destination-test
+    tableName: ${self:custom.tableName}
+    usersTableName: ${self:custom.usersTableName}
+
+    # References to auto-generated names of buckets. Does not print properly locally but does work!
+    uploadsBucketName: !Ref UploadsBucket
+    destBucketName: !Ref DestinationBucket
     stripeSecret: ${env:STRIPE_SECRET_KEY}
   
   # iamRoleStatements = iamRole for lambda functions
   iamRoleStatements:
-    # Permissions for CRUD lambda functions on any table
+    # Permissions for CRUD lambda functions on tables
     - Effect: Allow
       Action:
         - dynamodb:DescribeTable
@@ -42,25 +53,44 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:us-west-2:*:*"
-    # Permissions for sendToTranscribe
+      # Restrict our IAM role permissions to
+      # the specific table for the stage
+      Resource:
+        - "Fn::GetAtt": [ TranscriptsTable, Arn ]
+        - "Fn::GetAtt": [ UsersTable, Arn ]
+      
+    # Permissions for sendToTranscribe and onTranscribeDump
     # Permission to use transcribe
     - Effect: Allow
       Action:
         - transcribe:*
       Resource: "*"
-    # Permission to access transcript destination bucket and write to data file
+
+    # Permission to access transcript destination bucket
     - Effect: Allow
       Action:
         - s3:GetObject
         - s3:PutObject
         - s3:DeleteObject
-      Resource: "arn:aws:s3:::wordbose-destination-test/*"
+      Resource:
+        Fn::Join:
+          - ""
+          - - "arn:aws:s3:::"
+            - "Ref" : "DestinationBucket"
+            - "/*"
+
+    # Permission to access transcript uploads bucket
     - Effect: Allow
       Action:
         - s3:GetObject
         - s3:DeleteObject
-      Resource: "arn:aws:s3:::wordbose-file-upload-test/*"
+      Resource:
+        Fn::Join:
+          - ""
+          - - "arn:aws:s3:::"
+            - "Ref" : "UploadsBucket"
+            - "/*"
+
     # Permission to allow for email alert upon transcript completion
     - Effect: Allow
       Action:
@@ -143,3 +173,10 @@ functions:
 resources:
   # API Gateway Errors
   - ${file(resources/api-gateway-errors.yml)}
+  # DynamoDB Tables
+  - ${file(resources/dynamodb-tables.yml)}
+  # S3 Buckets
+  - ${file(resources/s3-buckets.yml)}
+  # Cognito
+  - ${file(resources/cognito-user-pool.yml)}
+  - ${file(resources/cognito-identity-pool.yml)}
