@@ -4,7 +4,6 @@ import stripePkg from "stripe";
 
 export async function handler(event, context) {
     const stripe = stripePkg(process.env.stripeSecret);
-    console.log("Stripe Key", process.env.stripeSecret);
 
     const data = JSON.parse(event.body);
 
