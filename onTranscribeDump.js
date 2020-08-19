@@ -145,7 +145,7 @@ export async function handler(event, context) {
             Data: "Your transcript is complete!"
           }
         },
-        Source: "josh@wordbose.com"
+        Source: "Wordbose Notifications <notifications@wordbose.com>"
       };
 
       const sentEmail = await ses.sendEmail(emailParams).promise();
