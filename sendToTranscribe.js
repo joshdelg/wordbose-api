@@ -73,20 +73,20 @@ export async function handler(event, context) {
       ReturnValues: 'ALL_NEW'
     };
 
-    const secondUpdateParams = {
-      TableName: process.env.usersTableName,
-      Key: {
-        userId: userId
-      },
-      UpdateExpression: 'set longestTranscriptSeconds = :d',
-      ConditionExpression: ':d > longestTranscriptSeconds',
-      ExpressionAttributeValues: {
-        ':d': fileDuration
-      }
-    };
+    // const secondUpdateParams = {
+    //   TableName: process.env.usersTableName,
+    //   Key: {
+    //     userId: userId
+    //   },
+    //   UpdateExpression: 'set longestTranscriptSeconds = :d',
+    //   ConditionExpression: ':d > longestTranscriptSeconds',
+    //   ExpressionAttributeValues: {
+    //     ':d': fileDuration
+    //   }
+    // };
 
     await documentClient.update(dynamoUpdateParams).promise();
-    await documentClient.update(secondUpdateParams).promise();
+    // await documentClient.update(secondUpdateParams).promise();
 
     return createResponse(200, JSON.stringify({status: true}));
   } catch (err) {
