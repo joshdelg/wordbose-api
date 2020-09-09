@@ -7,10 +7,8 @@ export const handler = wrapper(async(event, context) => {
 
   // Use tableName defined in serverless.yml, get document by its key
   // from event parameters
-  // ! Error to test error catching
   var params = {
-    //TableName: process.env.tableName,
-    TableName: "hello, world",
+    TableName: process.env.tableName,
     Key: {
       userId: event.requestContext.identity.cognitoIdentityId,
       transcriptId: event.pathParameters.id,
