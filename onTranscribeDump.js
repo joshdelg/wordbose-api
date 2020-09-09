@@ -4,11 +4,11 @@ import AWS from "aws-sdk";
 export const handler = wrapper(async(event, context) => {
   const blockify = (newBlocks, transcriptObject, numSpeakers) => {
     const items = transcriptObject.results.items;
-  
+
     if(numSpeakers > 1) {
       // Split transcript into blocks
       let blocks = [];
-  
+
       let i = 0;
       const segments = transcriptObject.results.speaker_labels.segments;
       segments.forEach((seg) => {
@@ -17,7 +17,7 @@ export const handler = wrapper(async(event, context) => {
         let startTime = seg.start_time;
         let endTime = seg.end_time;
         let text = "";
-  
+
         const segmentItems = seg.items;
         segmentItems.forEach((word, index) => {
           let item = items[i];
@@ -33,7 +33,7 @@ export const handler = wrapper(async(event, context) => {
         text = text.substring(0, text.length - 1);
         blocks.push({speakerId, speakerName, startTime, endTime, text});
       });
-  
+
       let ind = 0;
       while(ind < blocks.length) {
         let currBlock = blocks[ind];
