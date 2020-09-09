@@ -1,8 +1,7 @@
+import wrapper from "./libs/lambda-lib";
 import AWS from "aws-sdk";
-import createResponse from "./libs/response-lib";
 
-export async function handler(event, context) {
-
+export const handler = wrapper(async(event, context) => {
   const s3 = new AWS.S3();
   const documentClient = new AWS.DynamoDB.DocumentClient();
 
@@ -23,25 +22,19 @@ export async function handler(event, context) {
     ReturnValues: 'ALL_OLD'
   };
 
-  try {
+   // Get file location from dynamoDB object
+   const obj = await documentClient.get(getParams).promise();
+   //Format: s3://${bucket}/${key}
+   const fileLocation = obj.Item.fileLocation;
 
-    // Get file location from dynamoDB object
-    const obj = await documentClient.get(getParams).promise();
-    //Format: s3://${bucket}/${key}
-    const fileLocation = obj.Item.fileLocation;
+   // Delete media file from upload bucket
+   const bucket = process.env.uploadsBucketName;
+   const itemKey = fileLocation.substring(6 + bucket.length);
 
-    // Delete media file from upload bucket
-    const bucket = process.env.uploadsBucketName;
-    const itemKey = fileLocation.substring(6 + bucket.length);
+   await s3.deleteObject({Bucket: bucket, Key: itemKey}).promise();
 
-    await s3.deleteObject({Bucket: bucket, Key: itemKey}).promise();
+   // Delete object from dynamoDB
+   const deleted = await documentClient.delete(params).promise();
 
-    // Delete object from dynamoDB
-    const deleted = await documentClient.delete(params).promise();
-    return createResponse(200, JSON.stringify(deleted.Attributes));
-  } catch (e) {
-    console.log(e);
-    return createResponse(500, JSON.stringify({ status: false }));
-  }
-
-}
+   return deleted.Attributes;
+});

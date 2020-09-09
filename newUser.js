@@ -1,8 +1,8 @@
+import wrapper from "./libs/lambda-lib";
 import AWS from 'aws-sdk';
-import createResponse from './libs/response-lib';
 import moment from "moment";
 
-export async function handler(event, context) {
+export const handler = wrapper(async(event, context) => {
   const documentClient = new AWS.DynamoDB.DocumentClient();
 
   // Email
@@ -26,11 +26,6 @@ export async function handler(event, context) {
     }
   };
 
-  try {
-    await documentClient.put(params).promise();
-    return createResponse(200, JSON.stringify(params.Item));
-  } catch (e) {
-    console.log(e);
-    return createResponse(500, JSON.stringify({status: false}));
-  }
-}
+  await documentClient.put(params).promise();
+  return params.Item;
+});

@@ -1,7 +1,7 @@
+import wrapper from "./libs/lambda-lib";
 import AWS from 'aws-sdk';
-import createResponse from './libs/response-lib';
 
-export async function handler(event, context) {
+export const handler = wrapper(async(event, context) => {
   // Initialize document client
   const documentClient = new AWS.DynamoDB.DocumentClient();
 
@@ -27,12 +27,7 @@ export async function handler(event, context) {
     ReturnValues: 'ALL_NEW'
   };
 
-  try {
-    const updated = await documentClient.update(params).promise();
-    return createResponse(200, JSON.stringify(updated.Attributes));
-  } catch (e) {
-    console.log(e);
-    return createResponse(500, JSON.stringify({status: false}));
-  }
-
-}
+  const updated = await documentClient.update(params).promise();
+  
+  return updated.Attributes;
+});

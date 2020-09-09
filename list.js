@@ -1,8 +1,7 @@
+import wrapper from "./libs/lambda-lib";
 import AWS from 'aws-sdk';
-import createResponse from './libs/response-lib';
 
-export async function handler(event, context) {
-
+export const handler = wrapper(async(event, context) => {
   // Initialize document client to use native js types
   const documentClient = new AWS.DynamoDB.DocumentClient();
 
@@ -17,15 +16,10 @@ export async function handler(event, context) {
     }
   };
 
-  try {
-    // Capture response from query
-    const data = await documentClient.query(params).promise();
-    // Get items from the query response and return it as JSON data
-    const items = data.Items;
-    return createResponse(200, JSON.stringify(items));
-  } catch (e) {
-    // If there is an error return 500 status
-    return createResponse(500, JSON.stringify({status: false}));
-  }
+  // Capture response from query
+  const data = await documentClient.query(params).promise();
+  // Get items from the query response and return it as JSON data
+  const items = data.Items;
 
-}
+  return items;
+});

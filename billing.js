@@ -1,8 +1,8 @@
-import createResponse from './libs/response-lib';
+import wrapper from './libs/lambda-lib';
 import calculatePrice from './libs/billing-lib';
 import stripePkg from "stripe";
 
-export async function handler(event, context) {
+export const handler = wrapper(async(event, context) => {
     const stripe = stripePkg(process.env.stripeSecret);
 
     const data = JSON.parse(event.body);
@@ -10,17 +10,10 @@ export async function handler(event, context) {
     // Transcript duration in seconds
     const duration = data.duration;
 
-    try {
-        // Create stripe payment intent
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount: calculatePrice(duration),
-            currency: 'usd'
-        });
+    const paymentIntent = await stripe.paymentIntents.create({
+        amount: calculatePrice(duration),
+        currency: 'usd'
+    });
 
-        console.log('Payment intent created successfully:', paymentIntent.id, paymentIntent.amount);
-        return createResponse(200, JSON.stringify({clientSecret: paymentIntent.client_secret}));
-    } catch (err) {
-        console.log(err);
-        return createResponse(500, JSON.stringify({status: false}));
-    }
-}
+    return {clientSecret: paymentIntent.client_secret};
+});

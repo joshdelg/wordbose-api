@@ -1,9 +1,8 @@
+import wrapper from "./libs/lambda-lib";
 import AWS from "aws-sdk";
-import createResponse from "./libs/response-lib";
 import moment from "moment";
 
-export async function handler(event, context) {
-
+export const handler = wrapper(async(event, context) => {
   // Triggered by S3 event
   const bucketName = event.Records[0].s3.bucket.name;
 
@@ -32,65 +31,58 @@ export async function handler(event, context) {
     }
   };
 
+  const object = await documentClient.get(dynamoParams).promise();
+
   // Make DynamoDB request to get number of speakers
-  try {
-    const object = await documentClient.get(dynamoParams).promise();
-    const numSpeakers = object.Item.numSpeakers;
-    const fileDuration = object.Item.fileDuration;
-    const isPaid = object.Item.isPaid;
+  const numSpeakers = object.Item.numSpeakers;
+  const fileDuration = object.Item.fileDuration;
+  const isPaid = object.Item.isPaid;
 
-    // Default to multiple speakers until setting added on frontend
-    const transcribeJobParams = {
-      LanguageCode: 'en-US',
-      Media: {
-        MediaFileUri: s3URI
-      },
-      TranscriptionJobName: `${userIdMod}_${transcriptId}`,
-      OutputBucketName: process.env.destBucketName,
-      Settings: (numSpeakers > 1) ? ({
-        MaxSpeakerLabels: numSpeakers,
-        ShowSpeakerLabels: true
-      }) : {}
-    };
+  const transcribeJobParams = {
+    LanguageCode: 'en-US',
+    Media: {
+      MediaFileUri: s3URI
+    },
+    TranscriptionJobName: `${userIdMod}_${transcriptId}`,
+    OutputBucketName: process.env.destBucketName,
+    Settings: (numSpeakers > 1) ? ({
+      MaxSpeakerLabels: numSpeakers,
+      ShowSpeakerLabels: true
+    }) : {}
+  };
 
-    console.log(s3URI);
+  // Send file to Transcribe
+  await transcribe.startTranscriptionJob(transcribeJobParams).promise();
 
-    // Send file to Transcribe
-    await transcribe.startTranscriptionJob(transcribeJobParams).promise();
+  // Update data in users database
+  const dynamoUpdateParams = {
+    TableName: process.env.usersTableName,
+    Key: {
+      userId: userId
+    },
+    UpdateExpression: `set numTranscripts = numTranscripts + :i, secondsTranscribed = secondsTranscribed + :s, lastTranscriptDate = :d${(isPaid) ? ', numPaidTranscripts = numPaidTranscripts + :i' : ''}`,
+    ExpressionAttributeValues: {
+      ':i': 1,
+      ':s': fileDuration,
+      ':d': moment().format()
+    },
+    ReturnValues: 'ALL_NEW'
+  };
 
-    // Update data in users database
-    const dynamoUpdateParams = {
-      TableName: process.env.usersTableName,
-      Key: {
-        userId: userId
-      },
-      UpdateExpression: `set numTranscripts = numTranscripts + :i, secondsTranscribed = secondsTranscribed + :s, lastTranscriptDate = :d${(isPaid) ? ', numPaidTranscripts = numPaidTranscripts + :i' : ''}`,
-      ExpressionAttributeValues: {
-        ':i': 1,
-        ':s': fileDuration,
-        ':d': moment().format()
-      },
-      ReturnValues: 'ALL_NEW'
-    };
+  // const secondUpdateParams = {
+  //   TableName: process.env.usersTableName,
+  //   Key: {
+  //     userId: userId
+  //   },
+  //   UpdateExpression: 'set longestTranscriptSeconds = :d',
+  //   ConditionExpression: ':d > longestTranscriptSeconds',
+  //   ExpressionAttributeValues: {
+  //     ':d': fileDuration
+  //   }
+  // };
 
-    // const secondUpdateParams = {
-    //   TableName: process.env.usersTableName,
-    //   Key: {
-    //     userId: userId
-    //   },
-    //   UpdateExpression: 'set longestTranscriptSeconds = :d',
-    //   ConditionExpression: ':d > longestTranscriptSeconds',
-    //   ExpressionAttributeValues: {
-    //     ':d': fileDuration
-    //   }
-    // };
+  await documentClient.update(dynamoUpdateParams).promise();
+  // await documentClient.update(secondUpdateParams).promise();
 
-    await documentClient.update(dynamoUpdateParams).promise();
-    // await documentClient.update(secondUpdateParams).promise();
-
-    return createResponse(200, JSON.stringify({status: true}));
-  } catch (err) {
-    console.log(err);
-    return createResponse(500, JSON.stringify({status: false}));
-  }
-}
+  return transcribeJobParams;
+});
