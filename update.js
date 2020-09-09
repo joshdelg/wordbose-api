@@ -28,6 +28,6 @@ export const handler = wrapper(async(event, context) => {
   };
 
   const updated = await documentClient.update(params).promise();
-  
+
   return updated.Attributes;
 });
