@@ -11,7 +11,7 @@ export const handler = wrapper(async(event, context) => {
     TableName: process.env.tableName,
     Key: {
       userId: event.requestContext.identity.cognitoIdentityId,
-      transcriptId: event.pathParameters.id,
+      //!transcriptId: event.pathParameters.id,
     },
   };
 
