@@ -1,6 +1,7 @@
 import wrapper from './libs/lambda-lib';
 import calculatePrice from './libs/billing-lib';
 import stripePkg from "stripe";
+import AWS from "aws-sdk";
 
 export const handler = wrapper(async(event, context) => {
     const stripe = stripePkg(process.env.stripeSecret);
@@ -18,7 +19,7 @@ export const handler = wrapper(async(event, context) => {
         },
     };
     const item = await documentClient.get(queryParams).promise();
-    const customerId = item.Item.paymentId;
+    const paymentId = item.Item.paymentId;
 
     const paymentIntent = await stripe.paymentIntents.create({
         amount: calculatePrice(duration),
