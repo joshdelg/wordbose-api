@@ -24,7 +24,8 @@ export const handler = wrapper(async(event, context) => {
     const paymentIntent = await stripe.paymentIntents.create({
         amount: calculatePrice(duration),
         currency: 'usd',
-        customer: paymentId
+        customer: paymentId,
+        setup_future_usage: 'on_session'
     });
 
     return {clientSecret: paymentIntent.client_secret};
