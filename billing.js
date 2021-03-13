@@ -20,13 +20,24 @@ export const handler = wrapper(async(event, context) => {
     };
     const item = await documentClient.get(queryParams).promise();
     const paymentId = item.Item.paymentId;
+    const paymentMethods = await stripe.paymentMethods.list({
+        customer: paymentId,
+        type: 'card',
+    });
 
-    const paymentIntent = await stripe.paymentIntents.create({
+    let paymentIntentParams = {
         amount: calculatePrice(duration),
         currency: 'usd',
         customer: paymentId,
         setup_future_usage: 'on_session'
-    });
+    }
+
+    if(paymentMethods.data[0].id) {
+        paymentIntentParams.payment_method = paymentMethods.data[0].id;
+        paymentIntentParams.confirm = true;
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create(paymentIntentParams);
 
     return {clientSecret: paymentIntent.client_secret};
 });
