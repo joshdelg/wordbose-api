@@ -30,7 +30,7 @@ export const handler = wrapper(async(event, context) => {
         currency: 'usd',
         customer: paymentId,
         setup_future_usage: 'on_session'
-    }
+    };
 
     if(paymentMethods.data[0].id) {
         paymentIntentParams.payment_method = paymentMethods.data[0].id;
