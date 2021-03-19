@@ -23,7 +23,7 @@ export const handler = wrapper(async(event, context) => {
       userId: event.requestContext.identity.cognitoIdentityId,
       name: name,
       email: email,
-      paymentId: customer.id,
+      customerId: customer.id,
       emailNotifications: true,
       numTranscripts: 0,
       numPaidTranscripts: 0,

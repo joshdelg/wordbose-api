@@ -19,23 +19,23 @@ export const handler = wrapper(async(event, context) => {
         },
     };
     const item = await documentClient.get(queryParams).promise();
-    const paymentId = item.Item.paymentId;
+    const customerId = item.Item.customerId;
     const paymentMethods = await stripe.paymentMethods.list({
-        customer: paymentId,
+        customer: customerId,
         type: 'card',
     });
 
     let paymentIntentParams = {
         amount: calculatePrice(duration),
         currency: 'usd',
-        customer: paymentId,
-        setup_future_usage: 'on_session'
+        customer: customerId
     };
 
-    if(paymentMethods.data[0].id) {
+    /*if(paymentMethods.data[0].id) {
         paymentIntentParams.payment_method = paymentMethods.data[0].id;
+        console.log("Payment Method Saved: ", paymentMethods.data[0])
         paymentIntentParams.confirm = true;
-    }
+    }*/
 
     const paymentIntent = await stripe.paymentIntents.create(paymentIntentParams);
 
