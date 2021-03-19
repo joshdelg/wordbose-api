@@ -20,10 +20,10 @@ export const handler = wrapper(async(event, context) => {
     };
     const item = await documentClient.get(queryParams).promise();
     const customerId = item.Item.customerId;
-    const paymentMethods = await stripe.paymentMethods.list({
+    /*const paymentMethods = await stripe.paymentMethods.list({
         customer: customerId,
         type: 'card',
-    });
+    });*/
 
     let paymentIntentParams = {
         amount: calculatePrice(duration),
