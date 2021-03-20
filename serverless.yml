@@ -1,7 +1,7 @@
 # service name
 service: wordbose-api
 
-# Create an optimized package for our functions 
+# Create an optimized package for our functions
 package:
   individually: true
 
@@ -40,7 +40,7 @@ provider:
     uploadsBucketName: !Ref UploadsBucket
     destBucketName: !Ref DestinationBucket
     stripeSecret: ${env:STRIPE_SECRET_KEY}
-  
+
   # iamRoleStatements = iamRole for lambda functions
   iamRoleStatements:
     # Permissions for CRUD lambda functions on tables
@@ -58,7 +58,7 @@ provider:
       Resource:
         - "Fn::GetAtt": [ TranscriptsTable, Arn ]
         - "Fn::GetAtt": [ UsersTable, Arn ]
-      
+
     # Permissions for sendToTranscribe and onTranscribeDump
     # Permission to use transcribe
     - Effect: Allow
@@ -152,6 +152,14 @@ functions:
     events:
       - http:
           path: billing
+          method: post
+          cors: true
+          authorizer: aws_iam
+  createSetupIntent:
+    handler: createSetupIntent.handler
+    events:
+      - http:
+          path: createSetupIntent
           method: post
           cors: true
           authorizer: aws_iam
