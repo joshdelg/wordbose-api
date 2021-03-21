@@ -163,6 +163,22 @@ functions:
           method: post
           cors: true
           authorizer: aws_iam
+  attachPaymentMethod:
+    handler: attachPaymentMethod.handler
+    events:
+      - http:
+          path: attachPaymentMethod
+          method: post
+          cors: true
+          authorizer: aws_iam
+  listPaymentMethods:
+    handler: listPaymentMethods.handler
+    events:
+      - http:
+          path: listPaymentMethod
+          method: post
+          cors: true
+          authorizer: aws_iam
 
   # S3 event trigger must be configured manually from upload bucket
   # (only on uploads to /private/)

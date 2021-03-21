@@ -1,0 +1,8 @@
+{
+  "requestContext": {
+    "identity": {
+      "cognitoIdentityId": "us-west-2:2deb3254-6024-455b-b663-c50b77ac2e3e"
+    }
+  },
+  "body": "{ \"paymentMethodId\": \"pm_1IXFHADCRuX8vF0ZAzP7YfEV\" }"
+}
