@@ -175,7 +175,7 @@ functions:
     handler: listPaymentMethods.handler
     events:
       - http:
-          path: listPaymentMethod
+          path: listPaymentMethods
           method: post
           cors: true
           authorizer: aws_iam
