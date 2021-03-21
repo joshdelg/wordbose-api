@@ -14,7 +14,33 @@ export const handler = wrapper(async(event, context) => {
     };
 
     const item = await documentClient.get(queryParams).promise();
-    const customerId = item.Item.customerId;
+    let customerId = item.Item.customerId;
+
+    if(!customerId) {
+        const name = item.Item.name;
+        const email = item.Item.email;
+
+        const customer = await stripe.customers.create({
+            name: name,
+            email: email
+        });
+
+        customerId = customer.id;
+
+        const updateParams = {
+            TableName: process.env.usersTableName,
+            Key: {
+              userId: event.requestContext.identity.cognitoIdentityId,
+            },
+            UpdateExpression: 'set customerId = :c',
+            ExpressionAttributeValues: {
+              ':c': customerId
+            },
+            ReturnValues: 'ALL_NEW'
+          };
+
+          await documentClient.update(updateParams).promise();
+    }
 
     const paymentMethods = await stripe.paymentMethods.list({
         customer: customerId,

@@ -1,7 +1,7 @@
 {
     "requestContext": {
       "identity": {
-        "cognitoIdentityId": "USER-SUB-1234"
+        "cognitoIdentityId": "us-west-2:103ff0e4-a3e0-41cc-9071-8f18c829ede5"
       }
     },
     "body": "{\"duration\":\"1260\"}"

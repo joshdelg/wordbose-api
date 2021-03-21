@@ -19,23 +19,39 @@ export const handler = wrapper(async(event, context) => {
         },
     };
     const item = await documentClient.get(queryParams).promise();
-    const customerId = item.Item.customerId;
-    /*const paymentMethods = await stripe.paymentMethods.list({
-        customer: customerId,
-        type: 'card',
-    });*/
+    let customerId = item.Item.customerId;
+
+    if(!customerId) {
+        const name = item.Item.name;
+        const email = item.Item.email;
+
+        const customer = await stripe.customers.create({
+            name: name,
+            email: email
+        });
+
+        customerId = customer.id;
+
+        const updateParams = {
+            TableName: process.env.usersTableName,
+            Key: {
+              userId: event.requestContext.identity.cognitoIdentityId,
+            },
+            UpdateExpression: 'set customerId = :c',
+            ExpressionAttributeValues: {
+              ':c': customerId
+            },
+            ReturnValues: 'ALL_NEW'
+          };
+
+          await documentClient.update(updateParams).promise();
+    }
 
     let paymentIntentParams = {
         amount: calculatePrice(duration),
         currency: 'usd',
         customer: customerId
     };
-
-    /*if(paymentMethods.data[0].id) {
-        paymentIntentParams.payment_method = paymentMethods.data[0].id;
-        console.log("Payment Method Saved: ", paymentMethods.data[0])
-        paymentIntentParams.confirm = true;
-    }*/
 
     const paymentIntent = await stripe.paymentIntents.create(paymentIntentParams);
 
