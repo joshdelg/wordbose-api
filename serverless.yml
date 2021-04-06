@@ -179,6 +179,14 @@ functions:
           method: post
           cors: true
           authorizer: aws_iam
+  refund:
+    handler: refund.handler
+    events:
+      - http:
+          path: refund
+          method: post
+          cors: true
+          authorizer: aws_iam
 
   # S3 event trigger must be configured manually from upload bucket
   # (only on uploads to /private/)
