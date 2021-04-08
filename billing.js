@@ -55,5 +55,5 @@ export const handler = wrapper(async(event, context) => {
 
     const paymentIntent = await stripe.paymentIntents.create(paymentIntentParams);
 
-    return {clientSecret: paymentIntent.client_secret};
+    return {clientSecret: paymentIntent.client_secret, paymentId: paymentIntent.id};
 });
